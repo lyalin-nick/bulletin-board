@@ -33,6 +33,7 @@ tests/_output/*
 tests/_support/_generated
 
 # локальное окружение с паролями; в репозиторий идёт только .env.example
+/TASK.md
 /.env
 /.env.*
 !/.env.example

@@ -10,6 +10,9 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
+    'language' => 'ru-RU',
+    'sourceLanguage' => 'en-US',
+    'timeZone' => 'UTC',
     'bootstrap' => ['log'],
     'container' => [
         'singletons' => [
@@ -28,21 +31,26 @@ $config = [
     ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
-        '@npm'   => '@vendor/npm-asset',
+        '@npm' => '@vendor/npm-asset',
     ],
     'components' => [
         'request' => [
             'cookieValidationKey' => Env::required('YII_COOKIE_VALIDATION_KEY'),
+            'trustedHosts' => ['172.16.0.0/12'],
+            'parsers' => [
+                'application/json' => \yii\web\JsonParser::class,
+            ],
         ],
         'cache' => [
             'class' => \yii\caching\FileCache::class,
         ],
         'user' => [
             'identityClass' => \app\models\User::class,
-            'enableAutoLogin' => true,
+            'enableSession' => false,
+            'enableAutoLogin' => false,
         ],
         'errorHandler' => [
-            'errorAction' => 'site/error',
+            'class' => \app\components\ApiErrorHandler::class,
         ],
         'mailer' => \yii\mail\MailerInterface::class,
         'log' => [
@@ -55,14 +63,23 @@ $config = [
             ],
         ],
         'db' => $db,
-        /*
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
+            'enableStrictParsing' => true,
             'rules' => [
+                [
+                    'class' => \yii\web\GroupUrlRule::class,
+                    'prefix' => 'api/v1',
+                    'routePrefix' => '',
+                    'rules' => [
+                        'POST auth/login' => 'auth/login',
+                        'POST auth/signup' => 'auth/signup',
+                        'POST auth/logout' => 'auth/logout',
+                    ],
+                ],
             ],
         ],
-        */
     ],
     'params' => $params,
 ];
@@ -73,7 +90,7 @@ if (YII_ENV_DEV) {
     $config['modules']['debug'] = [
         'class' => \yii\debug\Module::class,
         // uncomment the following to add your IP if you are not connecting from localhost.
-        //'allowedIPs' => ['127.0.0.1', '::1'],
+        'allowedIPs' => ['127.0.0.1', '::1', '*'],
     ];
 
     $config['bootstrap'][] = 'gii';
