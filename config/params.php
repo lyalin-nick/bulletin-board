@@ -15,4 +15,12 @@ return [
         'email' => 900,
         'phone' => 300,
     ],
+
+    'confirmCodeMaxAttempts' => [
+        'email' => 5,
+        'phone' => 5,
+    ],
+
+    // минимальный интервал между отправками кода, сек
+    'confirmCodeResendInterval' => 60,
 ];

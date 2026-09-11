@@ -109,6 +109,26 @@ class ConfirmCode extends ActiveRecord
     }
 
     /**
+     * Инкремент по количеству попыток
+     * @return void
+     */
+    public function increaseAttempts(): void
+    {
+        $this->updateCounters(['attempts' => 1]);
+    }
+
+    /**
+     * Достигнут ли лимит попыток ввода кода
+     * @return bool
+     */
+    public function checkLimit(): bool
+    {
+        $maxAttempts = Yii::$app->params['confirmCodeMaxAttempts'][$this->channel] ?? 5;
+
+        return $this->attempts >= $maxAttempts;
+    }
+
+    /**
      * Наружу код и его хеш не отдаём ни при каких обстоятельствах.
      * @return string[]
      */

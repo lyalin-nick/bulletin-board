@@ -107,9 +107,22 @@ class AccessToken extends ActiveRecord
         );
     }
 
+    /**
+     * Обновить время последнего использования
+     * @return void
+     */
     public function updateLastUsed(): void
     {
         $this->updateAttributes(['last_used_at' => date('Y-m-d H:i:s')]);
+    }
+
+    /**
+     * Пометить токен отозванным
+     * @return void
+     */
+    public function revoke(): void
+    {
+        $this->updateAttributes(['revoked_at' => new Expression('NOW()')]);
     }
 
     public function isRevoked(): bool
