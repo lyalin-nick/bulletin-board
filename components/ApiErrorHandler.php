@@ -19,6 +19,7 @@ class ApiErrorHandler extends ErrorHandler
     {
         if ($this->isApiRequest()) {
             self::forceProblemJson(Yii::$app->getResponse());
+            $this->errorAction = null;
         }
 
         parent::renderException($exception);

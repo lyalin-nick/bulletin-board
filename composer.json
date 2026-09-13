@@ -21,7 +21,8 @@
         "yiisoft/yii2-elasticsearch": "^2.1",
         "vlucas/phpdotenv": "^5.7",
         "giggsey/libphonenumber-for-php": "^9.0",
-        "matomo/device-detector": "^6.5"
+        "matomo/device-detector": "^6.5",
+        "almasaeed2010/adminlte": "^4.9"
     },
     "require-dev": {
         "codeception/c3": "^2.8",

@@ -33,6 +33,9 @@ $config = [
         '@bower' => '@vendor/bower-asset',
         '@npm' => '@vendor/npm-asset',
     ],
+    'modules' => [
+        'admin' => ['class' => 'app\modules\admin\Module'],
+    ],
     'components' => [
         'request' => [
             'cookieValidationKey' => Env::required('YII_COOKIE_VALIDATION_KEY'),
@@ -51,6 +54,7 @@ $config = [
         ],
         'errorHandler' => [
             'class' => \app\components\ApiErrorHandler::class,
+            'errorAction' => 'admin/error/index',
         ],
         'mailer' => \yii\mail\MailerInterface::class,
         'log' => [
@@ -81,6 +85,12 @@ $config = [
                         'POST auth/refresh' => 'auth/refresh',
                     ],
                 ],
+
+                // модуль админки
+                'admin' => 'admin/default/index',
+                'admin/<controller:[\w-]+>/<action:[\w-]+>/<id:\d+>' => 'admin/<controller>/<action>',
+                'admin/<controller:[\w-]+>/<action:[\w-]+>' => 'admin/<controller>/<action>',
+                'admin/<controller:[\w-]+>' => 'admin/<controller>/index',
             ],
         ],
     ],
@@ -100,7 +110,7 @@ if (YII_ENV_DEV) {
     $config['modules']['gii'] = [
         'class' => \yii\gii\Module::class,
         // uncomment the following to add your IP if you are not connecting from localhost.
-        //'allowedIPs' => ['127.0.0.1', '::1'],
+        'allowedIPs' => ['127.0.0.1', '::1', '*'],
     ];
 }
 
