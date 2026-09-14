@@ -51,6 +51,11 @@ $config = [
             'identityClass' => \app\models\User::class,
             'enableSession' => false,
             'enableAutoLogin' => false,
+            'accessChecker' => \app\components\DenyAllAccessChecker::class,
+        ],
+        'authManager' => [
+            'class' => \yii\rbac\DbManager::class,
+            'cache' => 'cache',
         ],
         'errorHandler' => [
             'class' => \app\components\ApiErrorHandler::class,

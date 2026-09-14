@@ -100,3 +100,7 @@ mysql-cli: ## Консоль MySQL
 
 redis-cli: ## Консоль Redis
 	$(DC) exec redis redis-cli
+
+rbac: ## Таблицы RBAC, роли и права
+	$(YII) migrate --migrationPath=@yii/rbac/migrations --interactive=0
+	$(YII) rbac/init

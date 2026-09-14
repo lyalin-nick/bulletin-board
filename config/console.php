@@ -46,6 +46,10 @@ $config = [
             ],
         ],
         'db' => $db,
+        'authManager' => [
+            'class' => \yii\rbac\DbManager::class,
+            'cache' => 'cache',
+        ],
     ],
     'params' => $params,
     /*

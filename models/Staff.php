@@ -24,12 +24,22 @@ use yii\web\IdentityInterface;
  *
  * @property-write string $password
  * @property-read string $authKey A key that is used to check the validity of a given identity ID.
+ * @property-read string $statusLabel
+ * @property-read string $roleLabel
  */
 class Staff extends ActiveRecord implements IdentityInterface
 {
     public const STATUS_DELETED = 0;
     public const STATUS_INACTIVE = 9;
     public const STATUS_ACTIVE = 10;
+
+    private ?string $_roleName = null;
+    private bool $_roleNameLoaded = false;
+
+    public const string ROLE_SUPERADMIN = 'superadmin';
+    public const string ROLE_ADMIN = 'admin';
+    public const string ROLE_MODERATOR = 'moderator';
+
     /**
      * {@inheritdoc}
      */
@@ -162,5 +172,103 @@ class Staff extends ActiveRecord implements IdentityInterface
     public function generateAuthKey(): void
     {
         $this->auth_key = Yii::$app->security->generateRandomString();
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusLabel(): string
+    {
+        $statuses = self::$statusLabels;
+        if (isset($statuses[$this->status])) {
+            return $statuses[$this->status];
+        }
+
+        throw new \RuntimeException('Unknown status');
+    }
+
+    public static $statusLabels = [
+        self::STATUS_DELETED => 'удален',
+        self::STATUS_INACTIVE => 'неактивен',
+        self::STATUS_ACTIVE => 'активен',
+    ];
+
+    /**
+     * Имя роли из назначений RBAC; null — роль не назначена.
+     * @return string|null
+     */
+    public function getRoleName(): ?string
+    {
+        if (!$this->_roleNameLoaded) {
+            $roles = Yii::$app->authManager->getRolesByUser($this->id);
+            $this->_roleName = array_key_first($roles);
+            $this->_roleNameLoaded = true;
+        }
+
+        return $this->_roleName;
+    }
+
+    public function getRoleLabel(): string
+    {
+        $name = $this->getRoleName();
+
+        if ($name === null) {
+            return '—';
+        }
+
+        $role = Yii::$app->authManager->getRole($name);
+
+        return $role?->description ?: $name;
+    }
+
+    public function softDelete()
+    {
+        return Yii::$app->db->transaction(function ($db) {
+            $this->status = self::STATUS_DELETED;
+            $this->save();
+            $authManager = Yii::$app->authManager;
+            $authManager->revokeAll($this->id);
+
+            return 1;
+        });
+    }
+
+    /**
+     * Является ли сотрудник последним АКТИВНЫМ суперадмином
+     */
+    public function isLastActiveSuperadmin(): bool
+    {
+        $ids = Yii::$app->authManager->getUserIdsByRole(self::ROLE_SUPERADMIN);
+
+        if (!in_array((string) $this->id, array_map('strval', $ids), true)) {
+            return false;
+        }
+
+        return (int) static::find()
+                ->where(['id' => $ids, 'status' => self::STATUS_ACTIVE])
+                ->count() <= 1;
+    }
+
+    public function deactivate(): void
+    {
+        $this->updateAttributes(['status' => self::STATUS_INACTIVE]);
+    }
+
+    public function activate(): void
+    {
+        $this->updateAttributes(['status' => self::STATUS_ACTIVE]);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function beforeDelete(): bool
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+        $authManager = Yii::$app->authManager;
+        $authManager->revokeAll($this->id);
+        return true;
     }
 }

@@ -8,6 +8,7 @@ use yii\bootstrap5\BootstrapAsset;
 use yii\bootstrap5\BootstrapPluginAsset;
 use yii\web\AssetBundle;
 use yii\web\View;
+use yii\web\YiiAsset;
 
 class AdminLteAsset extends AssetBundle
 {
@@ -26,6 +27,7 @@ class AdminLteAsset extends AssetBundle
     ];
 
     public $depends = [
+        YiiAsset::class,
         BootstrapAsset::class,
         BootstrapPluginAsset::class,
         BootstrapIconsAsset::class,

@@ -20,14 +20,13 @@ $items = [
 //        'permission' => 'manageCategories',
 //        'enabled' => false,
 //    ],
-//    [
-//        'label' => 'Админы',
-//        'icon' => 'bi-people',
-//        'url' => ['/admin/staff/index'],
-//        'route' => 'admin/staff',
-//        'permission' => 'manageStaff',
-//        'enabled' => false,
-//    ],
+    [
+        'label' => 'Админы',
+        'icon' => 'bi-people',
+        'url' => ['/admin/staff/index'],
+        'route' => 'admin/staff',
+        'permission' => 'manageStaff',
+    ],
 ];
 $currentRoute = Yii::$app->controller->getRoute();
 
