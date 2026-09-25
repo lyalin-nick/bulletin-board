@@ -6,6 +6,7 @@ namespace app\modules\admin\forms;
 
 use app\components\validators\PasswordValidator;
 use app\models\Staff;
+use app\rbac\Rbac;
 use Throwable;
 use Yii;
 use yii\base\Model;
@@ -133,7 +134,7 @@ class StaffForm extends Model
                 return true;
             }
 
-            if ($this->role !== Staff::ROLE_SUPERADMIN) {
+            if ($this->role !== Rbac::ROLE_SUPERADMIN) {
                 $this->addError('role', 'Нельзя снять роль superadmin с последнего активного суперадмина.');
 
                 return false;

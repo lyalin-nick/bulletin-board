@@ -1,5 +1,6 @@
 <?php
 
+use app\rbac\Rbac;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -11,21 +12,31 @@ $items = [
         'icon' => 'bi-speedometer2',
         'url' => ['/admin/default/index'],
         'route' => 'admin/default',
+        'enabled' => true
+    ],
+    [
+        'label' => 'Категории',
+        'icon' => 'bi-diagram-3',
+        'url' => ['/admin/category/index'],
+        'route' => 'admin/category',
+        'permission' => Rbac::PERM_MANAGE_CATEGORIES,
+        'enabled' => true
     ],
 //    [
-//        'label' => 'Категории',
-//        'icon' => 'bi-diagram-3',
-//        'url' => ['/admin/category/index'],
-//        'route' => 'admin/category',
-//        'permission' => 'manageCategories',
-//        'enabled' => false,
+//        'label' => 'Пользователи',
+//        'icon' => 'bi-people-fill',
+//        'url' => ['/admin/user/index'],
+//        'route' => 'admin/user',
+//        'permission' => Rbac::PERM_MANAGE_USERS,
 //    ],
+    ['header' => 'Система'],
     [
-        'label' => 'Админы',
+        'label' => 'Сотрудники',
         'icon' => 'bi-people',
         'url' => ['/admin/staff/index'],
         'route' => 'admin/staff',
-        'permission' => 'manageStaff',
+        'permission' => Rbac::PERM_MANAGE_STAFF,
+        'enabled' => true
     ],
 ];
 $currentRoute = Yii::$app->controller->getRoute();

@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace app\models;
 
+use app\rbac\Rbac;
+use RuntimeException;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
+use yii\helpers\Html;
 use yii\web\IdentityInterface;
 
 /**
@@ -33,12 +36,13 @@ class Staff extends ActiveRecord implements IdentityInterface
     public const STATUS_INACTIVE = 9;
     public const STATUS_ACTIVE = 10;
 
+    public static $statusLabels = [
+        self::STATUS_DELETED => 'удален',
+        self::STATUS_INACTIVE => 'неактивен',
+        self::STATUS_ACTIVE => 'активен',
+    ];
     private ?string $_roleName = null;
     private bool $_roleNameLoaded = false;
-
-    public const string ROLE_SUPERADMIN = 'superadmin';
-    public const string ROLE_ADMIN = 'admin';
-    public const string ROLE_MODERATOR = 'moderator';
 
     /**
      * {@inheritdoc}
@@ -46,6 +50,27 @@ class Staff extends ActiveRecord implements IdentityInterface
     public static function tableName(): string
     {
         return '{{%staff}}';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function findIdentity($id): Staff|null
+    {
+        return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function findIdentityByAccessToken($token, $type = null): never
+    {
+        throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
+    }
+
+    public static function findByEmail(string $email): Staff|null
+    {
+        return static::findOne(['email' => $email, 'status' => self::STATUS_ACTIVE]);
     }
 
     /**
@@ -96,27 +121,6 @@ class Staff extends ActiveRecord implements IdentityInterface
             'created_at' => 'Создан',
             'updated_at' => 'Изменён',
         ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function findIdentity($id): Staff|null
-    {
-        return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function findIdentityByAccessToken($token, $type = null): never
-    {
-        throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
-    }
-
-    public static function findByEmail(string $email): Staff|null
-    {
-        return static::findOne(['email' => $email, 'status' => self::STATUS_ACTIVE]);
     }
 
     /**
@@ -181,17 +185,30 @@ class Staff extends ActiveRecord implements IdentityInterface
     {
         $statuses = self::$statusLabels;
         if (isset($statuses[$this->status])) {
-            return $statuses[$this->status];
+            $classes = 'badge';
+            $classes .= ' ' . match ($this->status) {
+                    self::STATUS_INACTIVE => 'text-bg-warning',
+                    self::STATUS_ACTIVE => 'text-bg-success',
+                    default => 'text-bg-danger',
+                };
+            return Html::tag('span', $statuses[$this->status], ['class' => $classes]);
         }
 
-        throw new \RuntimeException('Unknown status');
+        throw new RuntimeException('Unknown status');
     }
 
-    public static $statusLabels = [
-        self::STATUS_DELETED => 'удален',
-        self::STATUS_INACTIVE => 'неактивен',
-        self::STATUS_ACTIVE => 'активен',
-    ];
+    public function getRoleLabel(): string
+    {
+        $name = $this->getRoleName();
+
+        if ($name === null) {
+            return '—';
+        }
+
+        $role = Yii::$app->authManager->getRole($name);
+
+        return $role?->description ?: $name;
+    }
 
     /**
      * Имя роли из назначений RBAC; null — роль не назначена.
@@ -206,19 +223,6 @@ class Staff extends ActiveRecord implements IdentityInterface
         }
 
         return $this->_roleName;
-    }
-
-    public function getRoleLabel(): string
-    {
-        $name = $this->getRoleName();
-
-        if ($name === null) {
-            return '—';
-        }
-
-        $role = Yii::$app->authManager->getRole($name);
-
-        return $role?->description ?: $name;
     }
 
     public function softDelete()
@@ -238,7 +242,7 @@ class Staff extends ActiveRecord implements IdentityInterface
      */
     public function isLastActiveSuperadmin(): bool
     {
-        $ids = Yii::$app->authManager->getUserIdsByRole(self::ROLE_SUPERADMIN);
+        $ids = Yii::$app->authManager->getUserIdsByRole(Rbac::ROLE_SUPERADMIN);
 
         if (!in_array((string) $this->id, array_map('strval', $ids), true)) {
             return false;

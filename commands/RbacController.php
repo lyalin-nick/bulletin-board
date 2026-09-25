@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\commands;
 
 use app\models\Staff;
+use app\rbac\Rbac;
 use Yii;
 use yii\console\Controller;
 use yii\console\ExitCode;
@@ -14,19 +15,6 @@ use yii\rbac\Role;
 
 class RbacController extends Controller
 {
-    private const array PERMISSIONS = [
-        'moderateAds' => 'Модерация объявлений',
-        'manageCategories' => 'Управление категориями',
-        'manageUsers' => 'Управление пользователями',
-        'manageStaff' => 'Управление сотрудниками',
-    ];
-
-    private const array ROLES = [
-        Staff::ROLE_MODERATOR => ['Модератор', ['moderateAds']],
-        Staff::ROLE_ADMIN => ['Администратор', ['manageCategories', 'manageUsers', Staff::ROLE_MODERATOR]],
-        Staff::ROLE_SUPERADMIN => ['Суперадмин', ['manageStaff', Staff::ROLE_ADMIN]],
-    ];
-
     /**
      * Создаёт права, роли и иерархию. Идемпотентна: существующее не пересоздаётся,
      * назначения сотрудников не затрагиваются — команду можно гонять при каждом деплое.
@@ -35,15 +23,15 @@ class RbacController extends Controller
     {
         $auth = Yii::$app->authManager;
 
-        foreach (self::PERMISSIONS as $name => $description) {
+        foreach (Rbac::permissions() as $name => $description) {
             $this->ensurePermission($auth, $name, $description);
         }
 
-        foreach (self::ROLES as $name => [$description, $children]) {
+        foreach (Rbac::roles() as $name => [$description, $children]) {
             $this->ensureRole($auth, $name, $description);
         }
 
-        foreach (self::ROLES as $roleName => [$description, $children]) {
+        foreach (Rbac::roles() as $roleName => [$description, $children]) {
             $role = $auth->getRole($roleName);
 
             foreach ($children as $childName) {
@@ -55,7 +43,7 @@ class RbacController extends Controller
             }
         }
 
-        $this->stdout(sprintf("RBAC инициализирован: прав %d, ролей %d.\n", count(self::PERMISSIONS), count(self::ROLES)));
+        $this->stdout(sprintf("RBAC инициализирован: прав %d, ролей %d.\n", count(Rbac::permissions()), count(Rbac::roles())));
 
         return ExitCode::OK;
     }
@@ -77,7 +65,7 @@ class RbacController extends Controller
         $role = $auth->getRole($roleName);
 
         if ($role === null) {
-            $this->stderr("Роль {$roleName} не найдена. Доступны: " . implode(', ', array_keys(self::ROLES)) . "\n");
+            $this->stderr("Роль {$roleName} не найдена. Доступны: " . implode(', ', array_keys(Rbac::roles())) . "\n");
 
             return ExitCode::DATAERR;
         }

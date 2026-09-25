@@ -222,4 +222,19 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return $this->name . ' ' . $this->surname;
     }
+
+    public function attributeLabels(): array
+    {
+        return [
+            'name' => 'Имя',
+            'surname' => 'Фамилия',
+            'email' => 'Email',
+            'email_verified_at' => 'Дата подтверждения email',
+            'phone' => 'Номер телефона',
+            'phone_verified_at' => 'Дата подтверждения номера телефона',
+            'status' => 'Статус',
+            'created_at' => 'Дата создания',
+            'updated_at' => 'Дата изменения',
+        ];
+    }
 }

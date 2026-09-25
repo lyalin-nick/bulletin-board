@@ -25,24 +25,17 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'id',
-            'full_name',
-            'email:email',
-            [
-                'label' => 'Роль',
-                'value' => function (Staff $model) {
-                    return $model->roleLabel;
-                }
-            ],
-            [
-                'attribute' => 'status',
-                'value' => function (Staff $model) {
-                    return $model->statusLabel;
-                }
-            ],
             [
                 'label' => 'Роль',
                 'value' => fn(Staff $model) => $model->roleLabel,
+            ],
+            'full_name',
+            'email:email',
+            [
+                'attribute' => 'status',
+                'filter' => Html::activeDropDownList($searchModel, 'status', Staff::$statusLabels, ['class' => 'form-control', 'prompt' => 'Все']),
+                'format' => 'raw',
+                'value' => fn(Staff $model) => $model->statusLabel,
             ],
             'last_login_at',
             'created_at',

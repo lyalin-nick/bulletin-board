@@ -45,6 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'email:email',
             [
                 'attribute' => 'status',
+                'format' => 'raw',
                 'value' => fn(Staff $model) => $model->statusLabel,
             ],
             [

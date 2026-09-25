@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\commands;
 
 use app\models\Staff;
+use app\rbac\Rbac;
 use Yii;
 use yii\console\Controller;
 use yii\console\ExitCode;
@@ -35,7 +36,7 @@ class StaffController extends Controller
             return ExitCode::DATAERR;
         }
 
-        $roleName = $role ?? Staff::ROLE_MODERATOR;
+        $roleName = $role ?? Rbac::ROLE_MODERATOR;
         $roleObject = Yii::$app->authManager->getRole($roleName);
 
         if ($roleObject === null) {
@@ -84,19 +85,19 @@ class StaffController extends Controller
                 'email' => 'superadmin@example.ru',
                 'fullName' => 'Иван Иванов',
                 'password' => YII_ENV === 'prod' ? Yii::$app->security->generateRandomString(8) : '123456',
-                'role' => Staff::ROLE_SUPERADMIN,
+                'role' => Rbac::ROLE_SUPERADMIN,
             ],
             [
                 'email' => 'admin@example.ru',
                 'fullName' => 'Петр Петров',
                 'password' => YII_ENV === 'prod' ? Yii::$app->security->generateRandomString(8) : '123456',
-                'role' => Staff::ROLE_ADMIN,
+                'role' => Rbac::ROLE_ADMIN,
             ],
             [
                 'email' => 'moderator@example.ru',
                 'fullName' => 'Николай Николаев',
                 'password' => YII_ENV === 'prod' ? Yii::$app->security->generateRandomString(8) : '123456',
-                'role' => Staff::ROLE_MODERATOR,
+                'role' => Rbac::ROLE_MODERATOR,
             ],
         ];
 

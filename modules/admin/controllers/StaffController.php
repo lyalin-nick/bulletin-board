@@ -5,6 +5,7 @@ namespace app\modules\admin\controllers;
 use app\models\Staff;
 use app\modules\admin\forms\StaffForm;
 use app\modules\admin\searches\StaffSearch;
+use app\rbac\Rbac;
 use Yii;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -197,7 +198,7 @@ class StaffController extends BaseAdminController
         return [
             [
                 'allow' => true,
-                'permissions' => ['manageStaff'],
+                'permissions' => [Rbac::PERM_MANAGE_STAFF],
             ],
         ];
     }
