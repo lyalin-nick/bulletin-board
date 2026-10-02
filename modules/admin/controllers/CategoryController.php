@@ -7,6 +7,7 @@ use app\modules\admin\searches\CategorySearch;
 use app\rbac\Rbac;
 use himiklab\sortablegrid\SortableGridAction;
 use Throwable;
+use Yii;
 use yii\db\Exception;
 use yii\db\StaleObjectException;
 use yii\web\NotFoundHttpException;
@@ -159,9 +160,14 @@ class CategoryController extends BaseAdminController
      */
     public function actionDelete(int $id): Response
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+        if ($model->delete()) {
+            Yii::$app->session->setFlash('success', 'Категория и все подкатегории успешно удалены');
+        } else {
+            Yii::$app->session->setFlash('error', 'Ошибка удаления категории');
+        }
 
-        return $this->redirect(['index']);
+        return $this->redirect($model->parent_id !== null ? ['index', 'CategorySearch[parent_id]' => $model->parent_id] : ['index']);
     }
 
     /**

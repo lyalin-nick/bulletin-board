@@ -32,11 +32,11 @@ use yii\web\IdentityInterface;
  */
 class Staff extends ActiveRecord implements IdentityInterface
 {
-    public const STATUS_DELETED = 0;
-    public const STATUS_INACTIVE = 9;
-    public const STATUS_ACTIVE = 10;
+    public const int STATUS_DELETED = 0;
+    public const int STATUS_INACTIVE = 9;
+    public const int STATUS_ACTIVE = 10;
 
-    public static $statusLabels = [
+    public static array $statusLabels = [
         self::STATUS_DELETED => 'удален',
         self::STATUS_INACTIVE => 'неактивен',
         self::STATUS_ACTIVE => 'активен',
@@ -190,7 +190,7 @@ class Staff extends ActiveRecord implements IdentityInterface
                     self::STATUS_INACTIVE => 'text-bg-warning',
                     self::STATUS_ACTIVE => 'text-bg-success',
                     default => 'text-bg-danger',
-                };
+            };
             return Html::tag('span', $statuses[$this->status], ['class' => $classes]);
         }
 

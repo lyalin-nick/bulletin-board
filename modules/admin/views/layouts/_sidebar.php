@@ -22,13 +22,13 @@ $items = [
         'permission' => Rbac::PERM_MANAGE_CATEGORIES,
         'enabled' => true
     ],
-//    [
-//        'label' => 'Пользователи',
-//        'icon' => 'bi-people-fill',
-//        'url' => ['/admin/user/index'],
-//        'route' => 'admin/user',
-//        'permission' => Rbac::PERM_MANAGE_USERS,
-//    ],
+    [
+        'label' => 'Пользователи',
+        'icon' => 'bi-people-fill',
+        'url' => ['/admin/user/index'],
+        'route' => 'admin/user',
+        'permission' => Rbac::PERM_MANAGE_USERS,
+    ],
     ['header' => 'Система'],
     [
         'label' => 'Сотрудники',

@@ -6,12 +6,14 @@ namespace app\models;
 
 use app\helpers\Phone;
 use app\models\user\AccessToken;
+use RuntimeException;
 use Yii;
 use yii\base\Exception;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
+use yii\helpers\Html;
 use yii\web\IdentityInterface;
 
 /**
@@ -29,14 +31,21 @@ use yii\web\IdentityInterface;
  * @property string|null $updated_at
  *
  * @property-read string $fullName
+ * @property-read string $statusLabel
  * @property AccessToken|null $currentAccessToken
  * @property-read AccessToken[] $accessTokens
  */
 class User extends ActiveRecord implements IdentityInterface
 {
-    public const STATUS_DELETED = 0;
-    public const STATUS_INACTIVE = 9;
-    public const STATUS_ACTIVE = 10;
+    public const int STATUS_DELETED = 0;
+    public const int STATUS_INACTIVE = 9;
+    public const int STATUS_ACTIVE = 10;
+
+    public static mixed $statusLabels = [
+        self::STATUS_DELETED => 'Удален',
+        self::STATUS_INACTIVE => 'Не подтвержден',
+        self::STATUS_ACTIVE => 'Активен'
+    ];
 
     public ?AccessToken $currentAccessToken = null;
 
@@ -221,6 +230,41 @@ class User extends ActiveRecord implements IdentityInterface
     public function getFullName(): string
     {
         return $this->name . ' ' . $this->surname;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusLabel(): string
+    {
+        $statuses = self::$statusLabels;
+        if (isset($statuses[$this->status])) {
+            $classes = 'badge';
+            $classes .= ' ' . match ($this->status) {
+                    self::STATUS_INACTIVE => 'text-bg-warning',
+                    self::STATUS_ACTIVE => 'text-bg-success',
+                    default => 'text-bg-danger',
+            };
+            return Html::tag('span', $statuses[$this->status], ['class' => $classes]);
+        }
+
+        throw new RuntimeException('Unknown status');
+    }
+
+    /**
+     * @return false|int
+     * @throws \Throwable
+     */
+    public function softDelete(): false|int
+    {
+        return Yii::$app->db->transaction(function ($db) {
+            $this->status = self::STATUS_DELETED;
+            $this->save();
+
+            // TODO деактивировать все объявления
+
+            return 1;
+        });
     }
 
     public function attributeLabels(): array

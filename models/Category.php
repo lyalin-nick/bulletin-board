@@ -3,6 +3,8 @@
 namespace app\models;
 
 use himiklab\sortablegrid\SortableGridBehavior;
+use Throwable;
+use Yii;
 use yii\behaviors\SluggableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -16,14 +18,14 @@ use yii\helpers\ArrayHelper;
  * @property int $id
  * @property int|null $parent_id ID родительской категории
  * @property string $name Название
- * @property string $slug ЧПУ
+ * @property string|null $slug ЧПУ
  * @property int $sort_order Порядок сортировки
  * @property bool $is_active Активен
  * @property string|null $created_at Создан
  * @property string|null $updated_at Изменен
  *
- * @property Category[] $subCategories
- * @property Category $parent
+ * @property-read Category[] $subCategories
+ * @property-read Category|null $parent
  */
 class Category extends ActiveRecord
 {
@@ -177,5 +179,44 @@ class Category extends ActiveRecord
         }
 
         return $path;
+    }
+
+    /**
+     * Удаление выполняется в транзакции: beforeDelete() каскадно удаляет поддерево
+     */
+    public function transactions(): array
+    {
+        return [
+            self::SCENARIO_DEFAULT => self::OP_DELETE,
+        ];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function beforeDelete(): bool
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+
+        foreach ($this->subCategories as $subCategory) {
+            try {
+                if ($subCategory->delete() === false) {
+                    return false;
+                }
+            } catch (Throwable $e) {
+                Yii::error([
+                    'message' => 'Не удалось удалить подкатегорию при каскадном удалении',
+                    'categoryId' => $this->id,
+                    'subCategoryId' => $subCategory->id,
+                    'error' => $e->getMessage(),
+                ], __METHOD__);
+
+                return false;
+            }
+        }
+
+        return true;
     }
 }

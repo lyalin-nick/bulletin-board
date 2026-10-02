@@ -23,7 +23,8 @@
         "giggsey/libphonenumber-for-php": "^9.0",
         "matomo/device-detector": "^6.5",
         "almasaeed2010/adminlte": "^4.9",
-        "himiklab/yii2-sortable-grid-view-widget": "^1.0"
+        "himiklab/yii2-sortable-grid-view-widget": "^1.0",
+        "kartik-v/yii2-date-range": "^1.7"
     },
     "require-dev": {
         "codeception/c3": "^2.8",

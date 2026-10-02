@@ -38,8 +38,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => fn(Staff $model) => $model->statusLabel,
             ],
             'last_login_at',
-            'created_at',
-            'updated_at',
             [
                 'class' => ActionColumn::class,
                 'urlCreator' => function ($action, Staff $model, $key, $index, $column) {
